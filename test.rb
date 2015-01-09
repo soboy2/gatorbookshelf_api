@@ -49,3 +49,19 @@ describe "Gatorbookshelf API Search" do
 
 
 end
+
+describe "Gatorbookshelf API Add" do
+  it "should return json" do
+    post '/add'
+    last_response.headers['Content-Type'].must_equal 'application/json'
+  end
+
+  it "should be a success" do
+    post '/add'
+    #assert_response :success
+    last_response.status.must_equal 200
+    api_response_body = {action: 'success'}
+    api_response_body.to_json.must_equal last_response.body
+  end
+
+end

@@ -32,3 +32,20 @@ get '/search/:keyword' do
   end
   results.to_json
 end
+
+post '/add' do
+  content_type :json
+  
+  @author = params[:author]
+  @title = params[:title]
+  @description = params[:description]
+  @listing_price = params[:listing_price]
+  @owner_id = params[:owner_id] #need to get this from session
+
+  response = {action: 'success'}
+
+  status 200
+  body response.to_json
+
+
+end
