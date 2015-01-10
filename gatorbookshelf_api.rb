@@ -1,5 +1,65 @@
 require 'sinatra'
 require 'json'
+require 'data_mapper'
+
+DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+
+class User
+  include DataMapper::Resource
+  property :id,           Serial
+  property :user_id,      String, :required => true
+  property :password,     String, :required => true
+  property :email,        String
+  property :member_since, DateTime
+
+  has n, :listing
+end
+
+class Listing
+  include DataMapper::Resource
+  property :id,             Serial
+  #property :owner_id,       String, :required => true
+  property :author,         String
+  property :title,          String
+  property :description,    Text
+  property :price,          String
+  property :status,         String
+  property :last_update,    DateTime
+
+  belongs_to :user
+end
+
+DataMapper.finalize
+
+post '/register' do
+  content_type :json
+  response = {action: 'success'}
+  status 200
+  body response.to_json
+end
+
+post '/login' do
+  content_type :json
+  response = {action: 'success'}
+  status 200
+  body response.to_json
+end
+
+
+post '/add' do
+  content_type :json
+
+  @author = params[:author]
+  @title = params[:title]
+  @description = params[:description]
+  @listing_price = params[:listing_price]
+  @owner_id = params[:owner_id] #need to get this from session
+
+  response = {action: 'success'}
+
+  status 200
+  body response.to_json
+end
 
 get '/search/:keyword' do
   content_type :json
@@ -31,33 +91,4 @@ get '/search/:keyword' do
     results = {error: 'no matches found'}
   end
   results.to_json
-end
-
-post '/add' do
-  content_type :json
-
-  @author = params[:author]
-  @title = params[:title]
-  @description = params[:description]
-  @listing_price = params[:listing_price]
-  @owner_id = params[:owner_id] #need to get this from session
-
-  response = {action: 'success'}
-
-  status 200
-  body response.to_json
-end
-
-post '/register' do
-  content_type :json
-  response = {action: 'success'}
-  status 200
-  body response.to_json
-end
-
-post '/login' do
-  content_type :json
-  response = {action: 'success'}
-  status 200
-  body response.to_json
 end
