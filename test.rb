@@ -16,80 +16,128 @@ def app
   Sinatra::Application
 end
 
-describe "Gatorbookshelf API Search" do
+describe "GET /search/:keyword" do
+  before { get '/search/lord%20of%20the%20rings' }
+  let(:results) { JSON.parse(last_response.body) }
+
   it "should return json" do
-    get '/search/lord%20of%20the%20rings'
     last_response.headers['Content-Type'].must_equal 'application/json'
   end
 
-  it "should return a list of potential results for 'lord of the rings'" do
-    get '/search/lord%20of%20the%20rings'
-    results = [
-      {
-        author: "R Tolkein",
-        title: "Lord of the rings: The hobbit",
-        last_update: "2015-01-05T11:30:00Z",
-        description: "Looks great",
-        listing_id: 1,
-        owner_id: 2,
-        listing_price: 33
-      },
-      {
-        author: "R Tolkein",
-        title: "Lord of the rings: Fellowship of the Ring",
-        last_update: "2015-02-06T10:30:00Z",
-        description: "Looks great",
-        listing_id: 2,
-        owner_id: 3,
-        listing_price: 30
+  it "responds successfully" do
+    assert last_response.ok?
+    results[0]['author'].must_equal 'R Tolkein'
+
+  end
+
+  it "returns 2 listings" do
+    results.size.must_equal 2
+  end
+end
+
+
+describe "POST /add_listing" do
+  before do
+    post('/add_listing', {
+      listing: {
+        title: 'Chronicles of Narnia',
+        author: 'C.S. Lewis',
+        description: 'In great condition',
+        listing_price: '20',
+        owner_id: ''
       }
-      ]
-    results.to_json.must_equal last_response.body
+    })
   end
 
+  let(:response) { JSON.parse(last_response.body) }
 
-end
-
-describe "Gatorbookshelf API Add" do
   it "should return json" do
-    post '/add'
     last_response.headers['Content-Type'].must_equal 'application/json'
   end
 
-  it "should be a success" do
-    post '/add'
-    #assert_response :success
-    last_response.status.must_equal 200
-    api_response_body = {action: 'success'}
-    api_response_body.to_json.must_equal last_response.body
+  it "responds successfully" do
+    assert last_response.ok?
   end
 
-end
+  it { response['status'].must_equal 'success'}
+  it { response['listing']['title'].must_equal 'Chronicles of Narnia'}
+  it { response['listing']['author'].must_equal 'C.S. Lewis'}
+  it { response['listing']['description'].must_equal 'In great condition'}
+  it { response['listing']['listing_price'].must_equal '20'}
+  it { response['listing']['owner_id'].must_equal 'bob'}
 
-describe "Gatorbookshelf API Register" do
+end
+# describe "Gatorbookshelf API Add" do
+#   it "should return json" do
+#     post '/add'
+#     last_response.headers['Content-Type'].must_equal 'application/json'
+#   end
+#
+#   it "should be a success" do
+#     post '/add'
+#     #last_response.status.must_equal 200
+#     assert last_response.ok?
+#     api_response_body = {status: 'success'}
+#     api_response_body.to_json.must_equal last_response.body
+#   end
+#
+# end
+
+describe "POST /register" do
+  before do
+    post('/register', {
+      user: {
+          user_id: 'bob',
+          email: 'bob@test.com',
+          password: '1234'
+      }
+    })
+  end
+
+  let(:response) { JSON.parse(last_response.body) }
+
   it "should return json" do
-    post '/register'
     last_response.headers['Content-Type'].must_equal 'application/json'
   end
 
-  it "should be a success" do
-    post '/register'
-    last_response.status.must_equal 200
-    api_response_body = {action: 'success'}
-    api_response_body.to_json.must_equal last_response.body
+  it "responds successfully" do
+    assert last_response.ok?
   end
+
+  it { response['status'].must_equal 'success'}
+  it { response['user']['user_id'].must_equal 'bob'}
+  it { response['user']['email'].must_equal 'bob@test.com'}
+  it { response['user']['password'].must_equal '1234'}
 end
 
-describe "Gatorbookshelf API login" do
+
+describe "POST /login" do
+  before do
+    post('/login', {
+      user: {
+        user_id: 'bob',
+        password: '1234'
+      }
+    })
+  end
+
+  let(:response) { JSON.parse(last_response.body) }
+
   it "should return json" do
-    post '/login'
     last_response.headers['Content-Type'].must_equal 'application/json'
   end
 
-  it "should be a success" do
-    post '/login'
-    last_response.status.must_equal 200
-    api_response_body = {action: 'success'}
-    api_response_body.to_json.must_equal last_response.body
+  it "responds successfully" do
+    assert last_response.ok?
   end
+
+  it { response['status'].must_equal 'success'}
 end
+
+
+# describe "Creating a User record" do
+#   it "shoud create a user" do
+#     user = User.create(user_id: 'sho', password: '1234')
+#     assert user.valid?, 'The user was not valid'
+#   end
+# end

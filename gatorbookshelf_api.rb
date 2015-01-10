@@ -32,30 +32,46 @@ end
 DataMapper.finalize
 
 post '/register' do
+  user = params[:user]
   content_type :json
-  response = {action: 'success'}
+  response = {status: 'success', user: user}
   status 200
   body response.to_json
 end
 
 post '/login' do
+  user = params[:user]
+  user_id = params[:user][:user_id]
+  password = params[:user][:password]
+
+  if user_id=='bob' and password == '1234'
+    response = {status: 'success'}
+  else
+    response = {status: 'error'}
+  end
+
   content_type :json
-  response = {action: 'success'}
+
   status 200
   body response.to_json
 end
 
 
-post '/add' do
+post '/add_listing' do
+  listing = params[:listing]
+  listing[:owner_id] = 'bob'
+
+
   content_type :json
 
-  @author = params[:author]
-  @title = params[:title]
-  @description = params[:description]
-  @listing_price = params[:listing_price]
-  @owner_id = params[:owner_id] #need to get this from session
 
-  response = {action: 'success'}
+  # @author = params[:author]
+  # @title = params[:title]
+  # @description = params[:description]
+  # @listing_price = params[:listing_price]
+  # @owner_id = params[:owner_id] #need to get this from session?
+
+  response = {status: 'success', listing: listing}
 
   status 200
   body response.to_json
