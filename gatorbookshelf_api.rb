@@ -35,7 +35,7 @@ end
 
 post '/add' do
   content_type :json
-  
+
   @author = params[:author]
   @title = params[:title]
   @description = params[:description]
@@ -46,6 +46,18 @@ post '/add' do
 
   status 200
   body response.to_json
+end
 
+post '/register' do
+  content_type :json
+  response = {action: 'success'}
+  status 200
+  body response.to_json
+end
 
+post '/login' do
+  content_type :json
+  response = {action: 'success'}
+  status 200
+  body response.to_json
 end

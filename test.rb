@@ -65,3 +65,31 @@ describe "Gatorbookshelf API Add" do
   end
 
 end
+
+describe "Gatorbookshelf API Register" do
+  it "should return json" do
+    post '/register'
+    last_response.headers['Content-Type'].must_equal 'application/json'
+  end
+
+  it "should be a success" do
+    post '/register'
+    last_response.status.must_equal 200
+    api_response_body = {action: 'success'}
+    api_response_body.to_json.must_equal last_response.body
+  end
+end
+
+describe "Gatorbookshelf API login" do
+  it "should return json" do
+    post '/login'
+    last_response.headers['Content-Type'].must_equal 'application/json'
+  end
+
+  it "should be a success" do
+    post '/login'
+    last_response.status.must_equal 200
+    api_response_body = {action: 'success'}
+    api_response_body.to_json.must_equal last_response.body
+  end
+end
