@@ -1,11 +1,11 @@
 require 'rubygems'
 require 'sinatra'
 require 'data_mapper'
-# require 'dm-core'
-# require 'dm-validations'
-# require 'dm-types'
-# require 'dm-migrations'
-#require 'dm-postgres-adapter'
+require 'dm-core'
+require 'dm-validations'
+require 'dm-types'
+require 'dm-migrations'
+require 'dm-postgres-adapter'
 require 'dm-sqlite-adapter'
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")

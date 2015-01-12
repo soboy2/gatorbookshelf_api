@@ -32,22 +32,38 @@ end
 
 DataMapper.finalize
 
+get '/heartbeat' do
+  response = {status: 'alive'}
+  status 200
+
+  content_type :json
+
+
+  body response.to_json
+end
+
 #user register
 post '/register' do
+  response = ''
   @user = User.new
   @user.username = params[:user][:username]
   @user.email = params[:user][:email]
   @user.password = params[:user][:password]
   @user.role = 'member'
   @user.member_since = Time.now
+  @user.save == true
   #@user.raise_on_save_failure = true
-  if @user.save == true
-    response = {status: 'success'}
-  else
-    response = {status: 'error'}
-  end
+  #@user.first_or_create
+
+  # if @user.save == true
+  #   response = {status: 'success'}
+  # else
+  #   response = {status: 'error'}
+  # end
+
+  response = {status: 'success'}
   status 200
-  #user.first_or_create
+
   content_type :json
 
 

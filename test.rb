@@ -16,6 +16,18 @@ def app
   Sinatra::Application
 end
 
+describe "GET /heartbeat" do
+  before { get '/heartbeat' }
+  let(:response) { JSON.parse(last_response.body) }
+
+  it "responds successfully" do
+    assert last_response.ok?
+  end
+
+  it { response['status'].must_equal 'alive'}
+end
+
+
 describe "GET /search/:keyword" do
   before { get '/search/lord%20of%20the%20rings' }
   let(:results) { JSON.parse(last_response.body) }
