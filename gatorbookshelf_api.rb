@@ -7,9 +7,10 @@ DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/developm
 class User
   include DataMapper::Resource
   property :id,           Serial
-  property :user_id,      String, :required => true
+  property :username,     String, :required => true
   property :password,     String, :required => true
   property :email,        String
+  property :role,         String
   property :member_since, DateTime
 
   has n, :listing
@@ -18,7 +19,7 @@ end
 class Listing
   include DataMapper::Resource
   property :id,             Serial
-  #property :owner_id,       String, :required => true
+  property :user_id,        String, :required => true
   property :author,         String
   property :title,          String
   property :description,    Text
@@ -31,20 +32,35 @@ end
 
 DataMapper.finalize
 
+#user register
 post '/register' do
-  user = params[:user]
-  content_type :json
-  response = {status: 'success', user: user}
+  @user = User.new
+  @user.username = params[:user][:username]
+  @user.email = params[:user][:email]
+  @user.password = params[:user][:password]
+  @user.role = 'member'
+  @user.member_since = Time.now
+  #@user.raise_on_save_failure = true
+  if @user.save == true
+    response = {status: 'success'}
+  else
+    response = {status: 'error'}
+  end
   status 200
+  #user.first_or_create
+  content_type :json
+
+
   body response.to_json
 end
 
+#user login
 post '/login' do
   user = params[:user]
-  user_id = params[:user][:user_id]
+  username = params[:user][:username]
   password = params[:user][:password]
 
-  if user_id=='bob' and password == '1234'
+  if username=='bob' and password == '1234'
     response = {status: 'success'}
   else
     response = {status: 'error'}
@@ -56,7 +72,7 @@ post '/login' do
   body response.to_json
 end
 
-
+#add new listing
 post '/add_listing' do
   listing = params[:listing]
   listing[:owner_id] = 'bob'
@@ -77,6 +93,7 @@ post '/add_listing' do
   body response.to_json
 end
 
+#search for a listing that matches the keyword
 get '/search/:keyword' do
   content_type :json
   keyword = params[:keyword]
@@ -89,7 +106,7 @@ get '/search/:keyword' do
         last_update: "2015-01-05T11:30:00Z",
         description: "Looks great",
         listing_id: 1,
-        owner_id: 2,
+        user_id: 2,
         listing_price: 33
       },
       {
@@ -98,7 +115,7 @@ get '/search/:keyword' do
         last_update: "2015-02-06T10:30:00Z",
         description: "Looks great",
         listing_id: 2,
-        owner_id: 3,
+        user_id: 3,
         listing_price: 30
       }
     ]

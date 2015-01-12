@@ -67,27 +67,13 @@ describe "POST /add_listing" do
   it { response['listing']['owner_id'].must_equal 'bob'}
 
 end
-# describe "Gatorbookshelf API Add" do
-#   it "should return json" do
-#     post '/add'
-#     last_response.headers['Content-Type'].must_equal 'application/json'
-#   end
-#
-#   it "should be a success" do
-#     post '/add'
-#     #last_response.status.must_equal 200
-#     assert last_response.ok?
-#     api_response_body = {status: 'success'}
-#     api_response_body.to_json.must_equal last_response.body
-#   end
-#
-# end
+
 
 describe "POST /register" do
   before do
     post('/register', {
       user: {
-          user_id: 'bob',
+          username: 'bob',
           email: 'bob@test.com',
           password: '1234'
       }
@@ -105,9 +91,9 @@ describe "POST /register" do
   end
 
   it { response['status'].must_equal 'success'}
-  it { response['user']['user_id'].must_equal 'bob'}
-  it { response['user']['email'].must_equal 'bob@test.com'}
-  it { response['user']['password'].must_equal '1234'}
+  # it { response['user']['username'].must_equal 'bob'}
+  # it { response['user']['email'].must_equal 'bob@test.com'}
+  # it { response['user']['password'].must_equal '1234'}
 end
 
 
@@ -115,7 +101,7 @@ describe "POST /login" do
   before do
     post('/login', {
       user: {
-        user_id: 'bob',
+        username: 'bob',
         password: '1234'
       }
     })
@@ -137,7 +123,31 @@ end
 
 # describe "Creating a User record" do
 #   it "shoud create a user" do
-#     user = User.create(user_id: 'sho', password: '1234')
+#     user = User.create(username: 'sho', password: '1234')
 #     assert user.valid?, 'The user was not valid'
 #   end
 # end
+
+describe User do
+  let(:user) { User.new(username: 'bob', password: '1234') }
+
+  it "is an instance of User" do
+    assert_instance_of User, user
+  end
+
+  it "is a valid User" do
+    user.valid?.must_equal true
+  end
+end
+
+describe Listing do
+    let(:listing) { Listing.new(user_id: '1') }
+
+    it "is an instance of Listing" do
+      assert_instance_of Listing, listing
+    end
+
+    it "is a valid Listing" do
+      listing.valid?.must_equal true
+    end
+end
