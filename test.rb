@@ -84,11 +84,11 @@ end
 describe "POST /register" do
   before do
     post('/register', {
-      user: {
-          username: 'bob',
-          email: 'bob@test.com',
+
+          username: 'jon',
+          email: 'jon@test.com',
           password: '1234'
-      }
+
     })
   end
 
@@ -133,15 +133,9 @@ describe "POST /login" do
 end
 
 
-# describe "Creating a User record" do
-#   it "shoud create a user" do
-#     user = User.create(username: 'sho', password: '1234')
-#     assert user.valid?, 'The user was not valid'
-#   end
-# end
 
 describe User do
-  let(:user) { User.new(username: 'bob', password: '1234') }
+  let(:user) { User.new(username: 'bob', password: '1234', email: 'fola@test.com') }
 
   it "is an instance of User" do
     assert_instance_of User, user

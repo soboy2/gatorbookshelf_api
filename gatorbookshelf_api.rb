@@ -1,19 +1,39 @@
+#%w[rubygems sinatra data_mapper].each{ |r| require r }
 require 'sinatra'
 require 'json'
 require 'data_mapper'
+#require 'dm-postgres-adapter'
+require 'dm-sqlite-adapter'
+require 'bcrypt'
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
 
+# configure :development do
+#   DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db")
+# end
+#
+# configure :production do
+#   DataMapper.setup(:default, ENV['DATABASE_URL'])
+# end
+
 class User
   include DataMapper::Resource
-  property :id,           Serial
+  property :id,           Serial, :key => true
   property :username,     String, :required => true
-  property :password,     String, :required => true
-  property :email,        String
+  property :password,     BCryptHash, :required => true
+  property :email,        String, :format => :email_address, :required => true
+  property :token,        String
   property :role,         String
   property :member_since, DateTime
+  property :updated_at,   DateTime
 
   has n, :listing
+
+  def generate_token!
+    self.token = SecureRandom.urlsafe_base64(64)
+    self.save!
+  end
+
 end
 
 class Listing
@@ -25,48 +45,75 @@ class Listing
   property :description,    Text
   property :price,          String
   property :status,         String
-  property :last_update,    DateTime
+  property :created_at,     DateTime
+  property :updated_at,     DateTime
 
   belongs_to :user
 end
 
 DataMapper.finalize
 
+def authenticate!
+  @user = User.first(:token => @access_token)
+  halt 403 unless @user
+end
+
+before do
+  begin
+    if request.env["HTTP_ACCESS_TOKEN"].is_a?(String)
+      @access_token = request.env["HTTP_ACCESS_TOKEN"]
+    end
+
+    if request.body.read(1)
+      request.body.rewind
+      @request_payload = JSON.parse request.body.read, { symbolize_names: true}
+
+    end
+
+  rescue JSON::ParserError => e
+    request.body.rewind
+    puts "The body #{request.body.read} was not JSON"
+  end
+end
+
 get '/heartbeat' do
   response = {status: 'alive'}
   status 200
-
   content_type :json
-
-
   body response.to_json
 end
 
 #user register
 post '/register' do
   response = ''
-  @user = User.new
-  @user.username = params[:user][:username]
-  @user.email = params[:user][:email]
-  @user.password = params[:user][:password]
-  @user.role = 'member'
-  @user.member_since = Time.now
-  @user.save == true
-  #@user.raise_on_save_failure = true
-  #@user.first_or_create
-
-  # if @user.save == true
-  #   response = {status: 'success'}
-  # else
-  #   response = {status: 'error'}
-  # end
-
-  response = {status: 'success'}
+  user = User.first(:username => params[:username])
+  puts "**** Check if user #{params[:username]} exists"
+  if user.nil? then
+    user = User.new
+    user.username = params[:username]
+    user.email = params[:email]
+    user.password = params[:password]
+    user.role = 'member'
+    user.member_since = Time.now
+    user.updated_at = Time.now
+    if user.save
+      puts 'success'
+      response = {status: 'success'}
+    else
+      #status 500
+      puts 'failed'
+      response = {status: 'error'}
+    end
+  else
+    #status 404
+    puts 'user already exists'
+    response = {error: 'select another username'}
+  end
+  # #@user.raise_on_save_failure = true
+  # #@user.first_or_create
   status 200
-
   content_type :json
-
-
+  puts response
   body response.to_json
 end
 
