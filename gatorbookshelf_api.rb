@@ -23,7 +23,7 @@ class User
   property :username,     String, :required => true
   property :password,     BCryptHash, :required => true
   property :email,        String, :format => :email_address, :required => true
-  property :token,        String
+  property :token,        Text
   property :role,         String
   property :member_since, DateTime
   property :updated_at,   DateTime
@@ -39,10 +39,10 @@ end
 
 class Listing
   include DataMapper::Resource
-  property :id,             Serial
+  property :id,             Serial, :key => true
   property :user_id,        String, :required => true
   property :author,         String
-  property :title,          String
+  property :title,          Text
   property :description,    Text
   property :price,          String
   property :status,         String
