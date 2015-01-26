@@ -2,19 +2,20 @@
 require 'sinatra'
 require 'json'
 require 'data_mapper'
-#require 'dm-postgres-adapter'
-require 'dm-sqlite-adapter'
+# require 'dm-postgres-adapter'
+# require 'dm-sqlite-adapter'
 require 'bcrypt'
 
-DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+DataMapper::Logger.new($stdout, :debug)
+#DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
 
-# configure :development do
-#   DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db")
-# end
-#
-# configure :production do
-#   DataMapper.setup(:default, ENV['DATABASE_URL'])
-# end
+configure :development do
+  DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db")
+end
+
+configure :production do
+  DataMapper.setup(:default, ENV['DATABASE_URL'])
+end
 
 class User
   include DataMapper::Resource
@@ -136,7 +137,7 @@ post '/login' do
 end
 
 #add new listing
-post '/add_listing' do
+post '/listing' do
   listing = params[:listing]
   listing[:owner_id] = 'bob'
 
