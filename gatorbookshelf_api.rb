@@ -85,7 +85,7 @@ get '/heartbeat' do
 end
 
 #user register
-post '/register' do
+post '/user' do
   response = ''
   user = User.first(:username => params[:username])
   puts "**** Check if user #{params[:username]} exists"

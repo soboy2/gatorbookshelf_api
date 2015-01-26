@@ -81,9 +81,9 @@ describe "POST /listing" do
 end
 
 
-describe "POST /register" do
+describe "POST /user" do
   before do
-    post('/register', {
+    post('/user', {
 
           username: 'jon',
           email: 'jon@test.com',
