@@ -87,32 +87,35 @@ end
 #user register
 post '/user' do
   response = ''
-  user = User.first(:username => params[:username])
-  puts "**** Check if user #{params[:username]} exists"
-  if user.nil? then
-    user = User.new
-    user.username = params[:username]
-    user.email = params[:email]
-    user.password = params[:password]
-    user.role = 'member'
-    user.member_since = Time.now
-    user.updated_at = Time.now
+  user_check = User.first(:username => @request_payload[:username])
+  puts "**** Check if user #{@request_payload[:username]} exists"
+  if user_check.nil? then
+    user = User.first_or_create(
+            :username => @request_payload[:username],
+            :email => @request_payload[:email],
+            :password => @request_payload[:password],
+            :role => 'member',
+            :member_since => Time.now,
+            :updated_at => Time.now
+          )
+
+
     if user.save
-      puts 'success'
-      response = {status: 'success'}
+      puts "***** added a new user @ " + user.id.to_s
+      response = {status: 'success', id: user.id}
+      status 201
     else
-      #status 500
+      status 500
       puts 'failed'
       response = {status: 'error'}
     end
   else
-    #status 404
+    status 404
     puts 'user already exists'
     response = {error: 'select another username'}
   end
   # #@user.raise_on_save_failure = true
   # #@user.first_or_create
-  status 200
   content_type :json
   puts response
   body response.to_json
