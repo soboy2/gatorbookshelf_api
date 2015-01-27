@@ -123,19 +123,20 @@ end
 
 #user login
 post '/login' do
-  user = params[:user]
-  username = params[:user][:username]
-  password = params[:user][:password]
-
-  if username=='bob' and password == '1234'
-    response = {status: 'success'}
+  puts "****** User " + @request_payload[:username] + " attempting to login"
+  user = User.first(:username => @request_payload[:username])
+  if user.password == @request_payload[:password]
+    if(user.token == nil)
+      user.generate_token!
+    end
+    response = {access_token: user.token, id: user.id, username: user.username, email: user.email}
+    status 200
   else
-    response = {status: 'error'}
+    reponse = {error: 'Username or Password is Invalid'}
+    status 401
   end
 
   content_type :json
-
-  status 200
   body response.to_json
 end
 
