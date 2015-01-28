@@ -28,7 +28,7 @@ class User
   property :member_since, DateTime
   property :updated_at,   DateTime
 
-  has n, :listing
+  has n, :listings
 
   def generate_token!
     self.token = SecureRandom.urlsafe_base64(64)
@@ -142,23 +142,32 @@ end
 
 #add new listing
 post '/listing' do
-  listing = params[:listing]
-  listing[:owner_id] = 'bob'
+  authenticate!
 
+  params = @request_payload[:listing]
 
-  content_type :json
+  if params.nil?
+    status 400
+  else
+    listing = Listing.first_or_create(
+              :author => params[:author],
+              :title => params[:title],
+              :description => params[:description],
+              :price => params[:price]
+              )
 
-
-  # @author = params[:author]
-  # @title = params[:title]
-  # @description = params[:description]
-  # @listing_price = params[:listing_price]
-  # @owner_id = params[:owner_id] #need to get this from session?
-
-  response = {status: 'success', listing: listing}
-
-  status 200
-  body response.to_json
+    #listing.save
+    @user.listings << listing
+    if @user.save
+      status 201
+      puts "***** added a new  listing " + listing.id.to_s
+      content_type :json
+      response = {status: 'success', id: listing.id}
+      body response.to_json
+    else
+      status 400
+    end
+  end
 end
 
 #search for a listing that matches the keyword
