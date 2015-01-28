@@ -170,6 +170,30 @@ post '/listing' do
   end
 end
 
+delete '/listing/:id' do
+  authenticate!
+
+  listing_id = params[:id]
+  listing = Listing.first(:user_id => @user.id, :id => listing_id )
+
+  if listing.nil?
+    status 400
+    content_type :json
+    response = {status: 'error', developer_message: 'no matching listing found'}
+    body response.to_json
+  else
+    if listing.destroy
+      status 200
+      puts "***** deleted listing " + listing_id
+      content_type :json
+      response = {status: 'success'}
+      body response.to_json
+    else
+      status 400
+    end
+  end
+end
+
 #search for a listing that matches the keyword
 get '/search/:keyword' do
   content_type :json
