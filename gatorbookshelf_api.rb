@@ -156,7 +156,6 @@ post '/listing' do
               :price => params[:price]
               )
 
-    #listing.save
     @user.listings << listing
     if @user.save
       status 201
@@ -170,6 +169,7 @@ post '/listing' do
   end
 end
 
+#deleting a listing
 delete '/listing/:id' do
   authenticate!
 
@@ -190,6 +190,41 @@ delete '/listing/:id' do
       body response.to_json
     else
       status 400
+    end
+  end
+end
+
+put '/listing' do
+  authenticate!
+
+  params = @request_payload[:listing]
+
+  if params.nil?
+    status 400
+  else
+    listing_id = params[:id]
+    listing = Listing.first(:user_id => @user.id, :id => listing_id )
+    if listing.nil?
+      status 400
+      content_type :json
+      response = {status: 'error', developer_message: 'no matching listing found'}
+      body response.to_json
+    else
+      saved = listing.update(
+      :author => params[:author],
+      :title => params[:title],
+      :description => params[:description],
+      :price => params[:price]
+      )
+      if saved
+        status 200
+        puts "***** updated listing " + listing_id
+        content_type :json
+        response = {status: 'success'}
+        body response.to_json
+      else
+        status 400
+      end
     end
   end
 end
