@@ -5,12 +5,20 @@ require 'dm-core'
 require 'dm-validations'
 require 'dm-types'
 require 'dm-migrations'
-require 'dm-sqlite-adapter'
-#require 'dm-postgres-adapter'
+#require 'dm-sqlite-adapter'
+require 'dm-postgres-adapter'
 require 'bcrypt'
 
 DataMapper::Logger.new($stdout, :debug)
-DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+#DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+
+configure :development do
+  DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db")
+end
+
+configure :production do
+  DataMapper.setup(:default, ENV['DATABASE_URL'])
+end
 
 class User
   include DataMapper::Resource
@@ -23,7 +31,7 @@ class User
   property :member_since, DateTime
   property :updated_at,   DateTime
 
-  has n, :listing
+  has n, :listings
 
   def generate_token!
     self.token = SecureRandom.urlsafe_base64(64)
@@ -41,6 +49,7 @@ class Listing
   property :description,    Text
   property :price,          String
   property :status,         String
+  #property :active         Boolean, :default => false
   property :created_at,     DateTime
   property :updated_at,     DateTime
 
