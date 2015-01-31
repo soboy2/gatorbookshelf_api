@@ -43,7 +43,7 @@ end
 class Listing
   include DataMapper::Resource
   property :id,             Serial, :key => true
-  property :user_id,        String, :required => true
+  property :user_id,        Integer, :required => true
   property :author,         String
   property :title,          Text
   property :description,    Text
