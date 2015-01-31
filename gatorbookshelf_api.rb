@@ -46,6 +46,7 @@ class Listing
   property :description,    Text
   property :price,          String
   property :status,         String
+  #property :active         Boolean, :default => false
   property :created_at,     DateTime
   property :updated_at,     DateTime
 
@@ -194,6 +195,7 @@ delete '/listing/:id' do
   end
 end
 
+#updating a listing
 put '/listing' do
   authenticate!
 
@@ -229,35 +231,17 @@ put '/listing' do
   end
 end
 
-#search for a listing that matches the keyword
-get '/search/:keyword' do
-  content_type :json
-  keyword = params[:keyword]
-  results = ''
-  if(keyword == 'lord of the rings')
-    results = [
-      {
-        author: "R Tolkein",
-        title: "Lord of the rings: The hobbit",
-        last_update: "2015-01-05T11:30:00Z",
-        description: "Looks great",
-        listing_id: 1,
-        user_id: 2,
-        listing_price: 33
-      },
-      {
-        author: "R Tolkein",
-        title: "Lord of the rings: Fellowship of the Ring",
-        last_update: "2015-02-06T10:30:00Z",
-        description: "Looks great",
-        listing_id: 2,
-        user_id: 3,
-        listing_price: 30
-      }
-    ]
+#search for a listing that matches the query
+get '/listing/:query' do
+  authenticate!
 
-  else
+  content_type :json
+  query = params[:query]
+  listings = Listing.all(:title.like => "%#{params[:query]}%") | Listing.all(:author.like => "%#{params[:query]}%") | Listing.all(:description.like => "%#{params[:query]}%")
+  if listings.nil?
     results = {error: 'no matches found'}
+  else
+    results = listings
   end
-  results.to_json
+  body results.to_json
 end
