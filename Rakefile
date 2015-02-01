@@ -60,6 +60,6 @@ end
 DataMapper.auto_migrate!
 
 
-# task(:default) {
-#   require_relative 'test'
-# }
+task(:default) {
+  require_relative 'test'
+}
